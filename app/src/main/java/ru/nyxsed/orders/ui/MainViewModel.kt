@@ -1,28 +1,51 @@
 package ru.nyxsed.orders.ui
 
-import android.os.Bundle
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import ru.nyxsed.orders.model.AppState
 import ru.nyxsed.orders.model.GroupLayout
 import ru.nyxsed.orders.model.Order
 import ru.nyxsed.orders.model.OrderType
 
-class MainViewModel(
-    private val savedStateHandle: SavedStateHandle
-) : ViewModel() {
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "orders_state_prefs")
 
-    private val _uiState: MutableStateFlow<AppState>
-    val uiState: StateFlow<AppState>
+class MainViewModel(
+    application: Application
+) : AndroidViewModel(application) {
+
+    private val dataStore = application.applicationContext.dataStore
+    private val stateKey = stringPreferencesKey("app_state_json")
+
+    private val _uiState: MutableStateFlow<AppState> = MutableStateFlow(AppState.createInitialState())
+    val uiState: StateFlow<AppState> = _uiState.asStateFlow()
 
     init {
-        val bundle: Bundle? = savedStateHandle.get<Bundle>(KEY_STATE)
-        val initialState = bundle?.let { AppState.fromBundle(it) } ?: AppState.createInitialState()
-        _uiState = MutableStateFlow(initialState)
-        uiState = _uiState.asStateFlow()
+        viewModelScope.launch {
+            try {
+                val preferences = dataStore.data.first()
+                val jsonStr = preferences[stateKey]
+                if (jsonStr != null) {
+                    val loadedState = AppState.fromJson(jsonStr)
+                    if (loadedState != null) {
+                        _uiState.value = loadedState
+                    }
+                }
+            } catch (_: Exception) {
+                // Fallback to initial state
+            }
+        }
     }
 
     private fun updateState(newState: AppState) {
@@ -32,7 +55,15 @@ class MainViewModel(
             newState
         }
         _uiState.value = sanitizedState
-        savedStateHandle[KEY_STATE] = sanitizedState.toBundle()
+        viewModelScope.launch {
+            try {
+                dataStore.edit { preferences ->
+                    preferences[stateKey] = sanitizedState.toJson()
+                }
+            } catch (_: Exception) {
+                // Handle persistence error if needed
+            }
+        }
     }
 
     fun addOrder(groupId: Int, type: OrderType) {
@@ -173,9 +204,5 @@ class MainViewModel(
         if (currentState.layout != layout) {
             updateState(currentState.copy(layout = layout))
         }
-    }
-
-    companion object {
-        private const val KEY_STATE = "app_state_bundle"
     }
 }

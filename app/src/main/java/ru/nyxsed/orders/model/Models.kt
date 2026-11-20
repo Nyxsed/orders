@@ -1,6 +1,8 @@
 package ru.nyxsed.orders.model
 
 import android.os.Bundle
+import org.json.JSONArray
+import org.json.JSONObject
 import ru.nyxsed.orders.R
 
 enum class GroupLayout {
@@ -56,6 +58,41 @@ data class AppState(
         }
     }
 
+    fun toJson(): String {
+        val json = JSONObject()
+        json.put("layout", layout.ordinal)
+        json.put("nextOrderId", nextOrderId)
+
+        val tokensArray = JSONArray()
+        commandTokens.forEach { token ->
+            val tokenObj = JSONObject()
+            tokenObj.put("id", token.id)
+            tokenObj.put("isSpent", token.isSpent)
+            tokensArray.put(tokenObj)
+        }
+        json.put("commandTokens", tokensArray)
+
+        val groupsArray = JSONArray()
+        groups.forEach { group ->
+            val groupObj = JSONObject()
+            groupObj.put("id", group.id)
+
+            val ordersArray = JSONArray()
+            group.orders.forEach { order ->
+                val orderObj = JSONObject()
+                orderObj.put("id", order.id)
+                orderObj.put("type", order.type.ordinal)
+                orderObj.put("isSpent", order.isSpent)
+                ordersArray.put(orderObj)
+            }
+            groupObj.put("orders", ordersArray)
+            groupsArray.put(groupObj)
+        }
+        json.put("groups", groupsArray)
+
+        return json.toString()
+    }
+
     companion object {
         const val MAX_COMMAND_TOKENS = 5
 
@@ -73,6 +110,68 @@ data class AppState(
                 layout = GroupLayout.VERTICAL,
                 nextOrderId = 1
             )
+        }
+
+        fun fromJson(jsonStr: String): AppState? {
+            try {
+                val json = JSONObject(jsonStr)
+                val layoutOrdinal = json.optInt("layout", GroupLayout.VERTICAL.ordinal)
+                val layout = GroupLayout.entries.getOrElse(layoutOrdinal) { GroupLayout.VERTICAL }
+                val nextOrderId = json.optInt("nextOrderId", 1)
+
+                val tokensArray = json.optJSONArray("commandTokens") ?: JSONArray()
+                val commandTokens = (0 until tokensArray.length()).map { i ->
+                    val tokenObj = tokensArray.getJSONObject(i)
+                    CommandToken(
+                        id = tokenObj.optInt("id", i + 1),
+                        isSpent = tokenObj.optBoolean("isSpent", false)
+                    )
+                }.take(MAX_COMMAND_TOKENS).let { list ->
+                    if (list.isEmpty()) {
+                        (1..MAX_COMMAND_TOKENS).map { CommandToken(id = it, isSpent = false) }
+                    } else {
+                        list
+                    }
+                }
+
+                val groupsArray = json.optJSONArray("groups") ?: JSONArray()
+                val groups = (0 until groupsArray.length()).map { i ->
+                    val groupObj = groupsArray.getJSONObject(i)
+                    val groupId = groupObj.optInt("id", i + 1)
+
+                    val ordersArray = groupObj.optJSONArray("orders") ?: JSONArray()
+                    val orders = (0 until ordersArray.length()).map { j ->
+                        val orderObj = ordersArray.getJSONObject(j)
+                        val typeOrdinal = orderObj.optInt("type", 0)
+                        val type = OrderType.entries.getOrElse(typeOrdinal) { OrderType.REGULAR }
+                        Order(
+                            id = orderObj.optInt("id", j + 1),
+                            type = type,
+                            isSpent = orderObj.optBoolean("isSpent", false)
+                        )
+                    }
+
+                    OrderGroup(
+                        id = groupId,
+                        orders = orders
+                    )
+                }.let { list ->
+                    if (list.isEmpty()) {
+                        listOf(OrderGroup(id = 1), OrderGroup(id = 2))
+                    } else {
+                        list
+                    }
+                }
+
+                return AppState(
+                    groups = groups,
+                    commandTokens = commandTokens,
+                    layout = layout,
+                    nextOrderId = nextOrderId
+                )
+            } catch (e: Exception) {
+                return null
+            }
         }
 
         fun fromBundle(bundle: Bundle): AppState {

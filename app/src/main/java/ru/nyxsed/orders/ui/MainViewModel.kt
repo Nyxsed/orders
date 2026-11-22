@@ -70,7 +70,7 @@ class MainViewModel(
 
     fun addOrder(groupId: Int, type: OrderType) {
         val currentState = _uiState.value
-        if (type == OrderType.REGULAR && currentState.isLossOfLt) {
+        if ((type == OrderType.REGULAR || type == OrderType.LIEUTENANT) && currentState.isLossOfLt) {
             return
         }
 
@@ -156,13 +156,15 @@ class MainViewModel(
                 .flatMap { g -> g.orders.filter { it.type == OrderType.REGULAR }.map { it.id } }
                 .toSet()
             val updatedGroups = currentState.groups.map { group ->
-                val newOrders = group.orders.map { order ->
-                    if (order.type == OrderType.REGULAR) {
-                        order.copy(type = OrderType.IRREGULAR)
-                    } else {
-                        order
+                val newOrders = group.orders
+                    .filter { it.type != OrderType.LIEUTENANT }
+                    .map { order ->
+                        if (order.type == OrderType.REGULAR) {
+                            order.copy(type = OrderType.IRREGULAR)
+                        } else {
+                            order
+                        }
                     }
-                }
                 group.copy(orders = newOrders)
             }
             updateState(

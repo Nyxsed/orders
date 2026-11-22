@@ -50,8 +50,8 @@ fun CompactCountersRow(
         ) {
             OrderType.entries.forEach { type ->
                 val count = orders.count { it.type == type }
-                val isRegularBlocked = type == OrderType.REGULAR && isLossOfLt
-                val canAdd = count < type.maxPerGroup && !isRegularBlocked
+                val isBlockedByLossOfLt = isLossOfLt && (type == OrderType.REGULAR || type == OrderType.LIEUTENANT)
+                val canAdd = count < type.maxPerGroup && !isBlockedByLossOfLt
                 val canRemove = count > 0
 
                 CompactCounterItem(

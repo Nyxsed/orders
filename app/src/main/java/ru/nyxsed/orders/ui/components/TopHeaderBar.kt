@@ -7,6 +7,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -19,7 +20,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +36,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -50,10 +55,15 @@ import ru.nyxsed.orders.ui.theme.OrderColors
 fun TopHeaderBar(
     commandTokens: List<CommandToken>,
     currentLayout: GroupLayout,
+    isLossOfLt: Boolean,
+    victoryPoints: Int,
     onResetOrders: () -> Unit,
     onFullReset: () -> Unit,
     onToggleCommandToken: (Int) -> Unit,
     onSelectLayout: (GroupLayout) -> Unit,
+    onToggleLossOfLt: () -> Unit,
+    onChangeVictoryPoints: (Int) -> Unit,
+    onOpenQuickActions: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
@@ -71,10 +81,11 @@ fun TopHeaderBar(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // Top Controls Row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -124,7 +135,7 @@ fun TopHeaderBar(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -132,7 +143,7 @@ fun TopHeaderBar(
                             contentDescription = "Reset Orders",
                             tint = MaterialTheme.colorScheme.onError,
                             modifier = Modifier
-                                .size(18.dp)
+                                .size(16.dp)
                                 .graphicsLayer {
                                     rotationZ = rotation.value
                                 }
@@ -142,7 +153,7 @@ fun TopHeaderBar(
                             text = "RESET ORDERS",
                             color = MaterialTheme.colorScheme.onError,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp
+                            fontSize = 12.sp
                         )
                     }
                 }
@@ -176,6 +187,115 @@ fun TopHeaderBar(
                             } else {
                                 MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                             }
+                        )
+                    }
+                }
+            }
+
+            // Status & VP Counter Bar
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Victory Points Counter
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    modifier = Modifier.border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(10.dp)
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = "🏆 VP",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+
+                        // Minus button
+                        VpButton(
+                            text = "−",
+                            enabled = victoryPoints > 0,
+                            onClick = { onChangeVictoryPoints(-1) }
+                        )
+
+                        Text(
+                            text = "$victoryPoints",
+                            fontWeight = FontWeight.ExtraBold,
+                            fontSize = 14.sp,
+                            modifier = Modifier.padding(horizontal = 4.dp)
+                        )
+
+                        // Plus button
+                        VpButton(
+                            text = "+",
+                            enabled = victoryPoints < 20,
+                            onClick = { onChangeVictoryPoints(1) }
+                        )
+                    }
+                }
+
+                // Loss of LT Checkbox Chip
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = if (isLossOfLt) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surface,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .border(
+                            width = 1.dp,
+                            color = if (isLossOfLt) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                        .clickable { onToggleLossOfLt() }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Checkbox(
+                            checked = isLossOfLt,
+                            onCheckedChange = { onToggleLossOfLt() },
+                            colors = CheckboxDefaults.colors(
+                                checkedColor = MaterialTheme.colorScheme.error,
+                                uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            ),
+                            modifier = Modifier.size(28.dp)
+                        )
+                        Text(
+                            text = if (isLossOfLt) "⚠️ LOSS OF LT" else "Loss of LT",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.sp,
+                            color = if (isLossOfLt) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+
+                // Quick Triggers Button
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = OrderColors.CommandTokenThumb,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable { onOpenQuickActions() }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "⚡ Triggers",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.sp,
+                            color = Color.White
                         )
                     }
                 }
@@ -220,5 +340,30 @@ fun TopHeaderBar(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun VpButton(
+    text: String,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(22.dp)
+            .clip(CircleShape)
+            .background(
+                if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+            )
+            .clickable(enabled = enabled, onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold,
+            color = if (enabled) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+        )
     }
 }

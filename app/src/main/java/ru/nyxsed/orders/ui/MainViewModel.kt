@@ -69,6 +69,10 @@ class MainViewModel(
 
     fun addOrder(groupId: Int, type: OrderType) {
         val currentState = _uiState.value
+        if (type == OrderType.REGULAR && currentState.isLossOfLt) {
+            return
+        }
+
         var currentNextId = currentState.nextOrderId
 
         if (type == OrderType.LIEUTENANT) {
@@ -135,6 +139,88 @@ class MainViewModel(
                 nextOrderId = currentNextId
             )
         )
+    }
+
+    fun toggleLossOfLt() {
+        val currentState = _uiState.value
+        updateState(currentState.copy(isLossOfLt = !currentState.isLossOfLt))
+    }
+
+    fun changeVictoryPoints(delta: Int) {
+        val currentState = _uiState.value
+        val newPoints = (currentState.victoryPoints + delta).coerceIn(0, 20)
+        updateState(currentState.copy(victoryPoints = newPoints))
+    }
+
+    fun convertIrregularToRegular(groupId: Int): Boolean {
+        val currentState = _uiState.value
+        if (currentState.isLossOfLt) return false
+        val firstUnspentTokenIndex = currentState.commandTokens.indexOfFirst { !it.isSpent }
+        if (firstUnspentTokenIndex == -1) return false
+
+        val targetGroup = currentState.groups.firstOrNull { it.id == groupId } ?: return false
+        val irregularIndex = targetGroup.orders.indexOfFirst { it.type == OrderType.IRREGULAR }
+        if (irregularIndex == -1) return false
+
+        val updatedOrders = targetGroup.orders.toMutableList()
+        val oldOrder = updatedOrders[irregularIndex]
+        updatedOrders[irregularIndex] = oldOrder.copy(type = OrderType.REGULAR)
+
+        val updatedGroups = currentState.groups.map { group ->
+            if (group.id == groupId) group.copy(orders = updatedOrders) else group
+        }
+        val updatedTokens = currentState.commandTokens.mapIndexed { index, token ->
+            if (index == firstUnspentTokenIndex) token.copy(isSpent = true) else token
+        }
+
+        updateState(currentState.copy(groups = updatedGroups, commandTokens = updatedTokens))
+        return true
+    }
+
+    fun cancelLossOfLtWithToken(): Boolean {
+        val currentState = _uiState.value
+        val firstUnspentTokenIndex = currentState.commandTokens.indexOfFirst { !it.isSpent }
+        if (firstUnspentTokenIndex == -1) return false
+
+        val updatedTokens = currentState.commandTokens.mapIndexed { index, token ->
+            if (index == firstUnspentTokenIndex) token.copy(isSpent = true) else token
+        }
+        updateState(currentState.copy(commandTokens = updatedTokens, isLossOfLt = false))
+        return true
+    }
+
+    fun moveOrderBetweenGroups(orderId: Int, fromGroupId: Int, toGroupId: Int): Boolean {
+        val currentState = _uiState.value
+        val firstUnspentTokenIndex = currentState.commandTokens.indexOfFirst { !it.isSpent }
+        if (firstUnspentTokenIndex == -1) return false
+
+        val sourceGroup = currentState.groups.firstOrNull { it.id == fromGroupId } ?: return false
+        val orderToMove = sourceGroup.orders.firstOrNull { it.id == orderId } ?: return false
+
+        val updatedGroups = currentState.groups.map { group ->
+            when (group.id) {
+                fromGroupId -> group.copy(orders = group.orders.filter { it.id != orderId })
+                toGroupId -> group.copy(orders = group.orders + orderToMove)
+                else -> group
+            }
+        }
+        val updatedTokens = currentState.commandTokens.mapIndexed { index, token ->
+            if (index == firstUnspentTokenIndex) token.copy(isSpent = true) else token
+        }
+        updateState(currentState.copy(groups = updatedGroups, commandTokens = updatedTokens))
+        return true
+    }
+
+    fun callSpeedball(): Boolean {
+        val currentState = _uiState.value
+        val firstUnspentTokenIndex = currentState.commandTokens.indexOfFirst { !it.isSpent }
+        if (firstUnspentTokenIndex == -1) return false
+
+        val updatedTokens = currentState.commandTokens.mapIndexed { index, token ->
+            if (index == firstUnspentTokenIndex) token.copy(isSpent = true) else token
+        }
+        updateState(currentState.copy(commandTokens = updatedTokens))
+        return true
     }
 
     fun removeOrder(groupId: Int, type: OrderType) {
@@ -215,7 +301,9 @@ class MainViewModel(
             currentState.copy(
                 groups = resetGroups,
                 commandTokens = resetTokens,
-                nextOrderId = 1
+                nextOrderId = 1,
+                isLossOfLt = false,
+                victoryPoints = 0
             )
         )
     }

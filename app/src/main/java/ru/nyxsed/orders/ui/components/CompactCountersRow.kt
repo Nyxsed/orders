@@ -30,6 +30,7 @@ import ru.nyxsed.orders.ui.theme.OrderColors
 @Composable
 fun CompactCountersRow(
     orders: List<Order>,
+    isLossOfLt: Boolean = false,
     onAddOrder: (OrderType) -> Unit,
     onRemoveOrder: (OrderType) -> Unit,
     modifier: Modifier = Modifier
@@ -49,7 +50,8 @@ fun CompactCountersRow(
         ) {
             OrderType.entries.forEach { type ->
                 val count = orders.count { it.type == type }
-                val canAdd = count < type.maxPerGroup
+                val isRegularBlocked = type == OrderType.REGULAR && isLossOfLt
+                val canAdd = count < type.maxPerGroup && !isRegularBlocked
                 val canRemove = count > 0
 
                 CompactCounterItem(

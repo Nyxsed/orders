@@ -23,6 +23,7 @@ import ru.nyxsed.orders.model.OrderType
 @Composable
 fun GroupSection(
     group: OrderGroup,
+    isLossOfLt: Boolean = false,
     onAddOrder: (OrderType) -> Unit,
     onRemoveOrder: (OrderType) -> Unit,
     onToggleOrder: (Int) -> Unit,
@@ -48,6 +49,7 @@ fun GroupSection(
             // Compact Counters Row
             CompactCountersRow(
                 orders = group.orders,
+                isLossOfLt = isLossOfLt,
                 onAddOrder = onAddOrder,
                 onRemoveOrder = onRemoveOrder
             )

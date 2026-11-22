@@ -41,12 +41,16 @@ data class AppState(
     val groups: List<OrderGroup>,
     val commandTokens: List<CommandToken>,
     val layout: GroupLayout = GroupLayout.VERTICAL,
-    val nextOrderId: Int = 1
+    val nextOrderId: Int = 1,
+    val isLossOfLt: Boolean = false,
+    val victoryPoints: Int = 0
 ) {
     fun toBundle(): Bundle {
         return Bundle().apply {
             putInt(KEY_LAYOUT, layout.ordinal)
             putInt(KEY_NEXT_ORDER_ID, nextOrderId)
+            putBoolean(KEY_LOSS_OF_LT, isLossOfLt)
+            putInt(KEY_VICTORY_POINTS, victoryPoints)
 
             putBooleanArray(KEY_COMMAND_TOKENS, commandTokens.map { it.isSpent }.toBooleanArray())
 
@@ -62,6 +66,8 @@ data class AppState(
         val json = JSONObject()
         json.put("layout", layout.ordinal)
         json.put("nextOrderId", nextOrderId)
+        json.put("isLossOfLt", isLossOfLt)
+        json.put("victoryPoints", victoryPoints)
 
         val tokensArray = JSONArray()
         commandTokens.forEach { token ->
@@ -99,6 +105,8 @@ data class AppState(
         private const val KEY_LAYOUT = "key_layout"
         private const val KEY_NEXT_ORDER_ID = "key_next_order_id"
         private const val KEY_COMMAND_TOKENS = "key_command_tokens"
+        private const val KEY_LOSS_OF_LT = "key_loss_of_lt"
+        private const val KEY_VICTORY_POINTS = "key_victory_points"
 
         fun createInitialState(): AppState {
             val initialTokens = (1..MAX_COMMAND_TOKENS).map { CommandToken(id = it, isSpent = false) }
@@ -108,7 +116,9 @@ data class AppState(
                 groups = listOf(group1, group2),
                 commandTokens = initialTokens,
                 layout = GroupLayout.VERTICAL,
-                nextOrderId = 1
+                nextOrderId = 1,
+                isLossOfLt = false,
+                victoryPoints = 0
             )
         }
 
@@ -118,6 +128,8 @@ data class AppState(
                 val layoutOrdinal = json.optInt("layout", GroupLayout.VERTICAL.ordinal)
                 val layout = GroupLayout.entries.getOrElse(layoutOrdinal) { GroupLayout.VERTICAL }
                 val nextOrderId = json.optInt("nextOrderId", 1)
+                val isLossOfLt = json.optBoolean("isLossOfLt", false)
+                val victoryPoints = json.optInt("victoryPoints", 0)
 
                 val tokensArray = json.optJSONArray("commandTokens") ?: JSONArray()
                 val commandTokens = (0 until tokensArray.length()).map { i ->
@@ -167,7 +179,9 @@ data class AppState(
                     groups = groups,
                     commandTokens = commandTokens,
                     layout = layout,
-                    nextOrderId = nextOrderId
+                    nextOrderId = nextOrderId,
+                    isLossOfLt = isLossOfLt,
+                    victoryPoints = victoryPoints
                 )
             } catch (e: Exception) {
                 return null
@@ -178,6 +192,8 @@ data class AppState(
             val layoutOrdinal = bundle.getInt(KEY_LAYOUT, GroupLayout.VERTICAL.ordinal)
             val layout = GroupLayout.entries.getOrElse(layoutOrdinal) { GroupLayout.VERTICAL }
             val nextOrderId = bundle.getInt(KEY_NEXT_ORDER_ID, 1)
+            val isLossOfLt = bundle.getBoolean(KEY_LOSS_OF_LT, false)
+            val victoryPoints = bundle.getInt(KEY_VICTORY_POINTS, 0)
 
             val tokenSpents = (bundle.getBooleanArray(KEY_COMMAND_TOKENS) ?: booleanArrayOf())
                 .take(MAX_COMMAND_TOKENS)
@@ -214,7 +230,9 @@ data class AppState(
                 groups = groups,
                 commandTokens = commandTokens,
                 layout = layout,
-                nextOrderId = nextOrderId
+                nextOrderId = nextOrderId,
+                isLossOfLt = isLossOfLt,
+                victoryPoints = victoryPoints
             )
         }
     }

@@ -13,11 +13,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.nyxsed.orders.model.GroupLayout
 import ru.nyxsed.orders.ui.components.GroupSection
+import ru.nyxsed.orders.ui.components.QuickActionsDialog
 import ru.nyxsed.orders.ui.components.TopHeaderBar
 
 @Composable
@@ -26,6 +30,7 @@ fun MainScreen(
     viewModel: MainViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var showQuickActionsDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -33,10 +38,15 @@ fun MainScreen(
             TopHeaderBar(
                 commandTokens = uiState.commandTokens,
                 currentLayout = uiState.layout,
+                isLossOfLt = uiState.isLossOfLt,
+                victoryPoints = uiState.victoryPoints,
                 onResetOrders = { viewModel.resetOrders() },
                 onFullReset = { viewModel.fullReset() },
                 onToggleCommandToken = { viewModel.toggleCommandToken(it) },
-                onSelectLayout = { viewModel.setLayout(it) }
+                onSelectLayout = { viewModel.setLayout(it) },
+                onToggleLossOfLt = { viewModel.toggleLossOfLt() },
+                onChangeVictoryPoints = { viewModel.changeVictoryPoints(it) },
+                onOpenQuickActions = { showQuickActionsDialog = true }
             )
         }
     ) { innerPadding ->
@@ -57,6 +67,7 @@ fun MainScreen(
                     uiState.groups.forEach { group ->
                         GroupSection(
                             group = group,
+                            isLossOfLt = uiState.isLossOfLt,
                             onAddOrder = { type -> viewModel.addOrder(group.id, type) },
                             onRemoveOrder = { type -> viewModel.removeOrder(group.id, type) },
                             onToggleOrder = { orderId -> viewModel.toggleOrder(group.id, orderId) }
@@ -71,6 +82,7 @@ fun MainScreen(
                     uiState.groups.forEach { group ->
                         GroupSection(
                             group = group,
+                            isLossOfLt = uiState.isLossOfLt,
                             onAddOrder = { type -> viewModel.addOrder(group.id, type) },
                             onRemoveOrder = { type -> viewModel.removeOrder(group.id, type) },
                             onToggleOrder = { orderId -> viewModel.toggleOrder(group.id, orderId) },
@@ -79,6 +91,28 @@ fun MainScreen(
                     }
                 }
             }
+        }
+
+        if (showQuickActionsDialog) {
+            QuickActionsDialog(
+                appState = uiState,
+                onDismiss = { showQuickActionsDialog = false },
+                onConvertIrregular = { groupId ->
+                    viewModel.convertIrregularToRegular(groupId)
+                },
+                onCancelLossOfLt = {
+                    viewModel.cancelLossOfLtWithToken()
+                },
+                onCallSpeedball = {
+                    viewModel.callSpeedball()
+                },
+                onMoveOrder = { fromGroup, toGroup ->
+                    val sourceOrders = uiState.groups.find { it.id == fromGroup }?.orders ?: emptyList()
+                    if (sourceOrders.isNotEmpty()) {
+                        viewModel.moveOrderBetweenGroups(sourceOrders.last().id, fromGroup, toGroup)
+                    }
+                }
+            )
         }
     }
 }

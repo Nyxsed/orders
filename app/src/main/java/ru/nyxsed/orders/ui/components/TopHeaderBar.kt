@@ -1,20 +1,25 @@
 package ru.nyxsed.orders.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -22,13 +27,20 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.launch
 import ru.nyxsed.orders.R
 import ru.nyxsed.orders.model.CommandToken
 import ru.nyxsed.orders.model.GroupLayout
@@ -39,10 +51,16 @@ fun TopHeaderBar(
     commandTokens: List<CommandToken>,
     currentLayout: GroupLayout,
     onResetOrders: () -> Unit,
+    onFullReset: () -> Unit,
     onToggleCommandToken: (Int) -> Unit,
     onSelectLayout: (GroupLayout) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val haptic = LocalHapticFeedback.current
+    val coroutineScope = rememberCoroutineScope()
+    val rotation = remember { Animatable(0f) }
+    val scale = remember { Animatable(1f) }
+
     Surface(
         modifier = modifier
             .fillMaxWidth()
@@ -62,25 +80,71 @@ fun TopHeaderBar(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Button(
-                    onClick = onResetOrders,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    ),
+                // Animated Reset Button supporting Tap & Long Press
+                Surface(
+                    modifier = Modifier
+                        .graphicsLayer {
+                            scaleX = scale.value
+                            scaleY = scale.value
+                        }
+                        .clip(RoundedCornerShape(8.dp))
+                        .pointerInput(Unit) {
+                            detectTapGestures(
+                                onTap = {
+                                    coroutineScope.launch {
+                                        rotation.animateTo(
+                                            targetValue = rotation.value - 180f,
+                                            animationSpec = tween(250, easing = FastOutSlowInEasing)
+                                        )
+                                    }
+                                    onResetOrders()
+                                },
+                                onLongPress = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    coroutineScope.launch {
+                                        launch {
+                                            scale.animateTo(1.2f, animationSpec = tween(120))
+                                            scale.animateTo(
+                                                1.0f,
+                                                animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                                            )
+                                        }
+                                        launch {
+                                            rotation.animateTo(
+                                                targetValue = rotation.value + 720f,
+                                                animationSpec = tween(600, easing = FastOutSlowInEasing)
+                                            )
+                                        }
+                                    }
+                                    onFullReset()
+                                }
+                            )
+                        },
+                    color = MaterialTheme.colorScheme.error,
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_reset),
-                        contentDescription = "Reset Orders",
-                        modifier = Modifier
-                            .size(18.dp)
-                            .padding(end = 4.dp)
-                    )
-                    Text(
-                        text = "RESET ORDERS",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 13.sp
-                    )
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_reset),
+                            contentDescription = "Reset Orders",
+                            tint = MaterialTheme.colorScheme.onError,
+                            modifier = Modifier
+                                .size(18.dp)
+                                .graphicsLayer {
+                                    rotationZ = rotation.value
+                                }
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "RESET ORDERS",
+                            color = MaterialTheme.colorScheme.onError,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        )
+                    }
                 }
 
                 Row(
@@ -133,7 +197,7 @@ fun TopHeaderBar(
                             } else {
                                 OrderColors.CommandTokenThumb
                             },
-                            animationSpec = tween(durationMillis = 200),
+                            animationSpec = tween(durationMillis = 300),
                             label = "token_color"
                         )
 

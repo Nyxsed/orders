@@ -34,6 +34,7 @@ fun MainScreen(
                 commandTokens = uiState.commandTokens,
                 currentLayout = uiState.layout,
                 onResetOrders = { viewModel.resetOrders() },
+                onFullReset = { viewModel.fullReset() },
                 onToggleCommandToken = { viewModel.toggleCommandToken(it) },
                 onSelectLayout = { viewModel.setLayout(it) }
             )

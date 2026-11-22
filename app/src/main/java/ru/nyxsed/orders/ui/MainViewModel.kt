@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import ru.nyxsed.orders.model.AppState
+import ru.nyxsed.orders.model.CommandToken
 import ru.nyxsed.orders.model.GroupLayout
 import ru.nyxsed.orders.model.Order
 import ru.nyxsed.orders.model.OrderType
@@ -197,6 +198,26 @@ class MainViewModel(
             group.copy(orders = resetOrdersList)
         }
         updateState(currentState.copy(groups = updatedGroups))
+    }
+
+    fun fullReset() {
+        val currentState = _uiState.value
+        val resetTokens = (1..AppState.MAX_COMMAND_TOKENS).map { index ->
+            CommandToken(
+                id = index,
+                isSpent = index > 1
+            )
+        }
+        val resetGroups = currentState.groups.map { group ->
+            group.copy(orders = emptyList())
+        }
+        updateState(
+            currentState.copy(
+                groups = resetGroups,
+                commandTokens = resetTokens,
+                nextOrderId = 1
+            )
+        )
     }
 
     fun setLayout(layout: GroupLayout) {

@@ -49,17 +49,20 @@ import kotlinx.coroutines.launch
 import ru.nyxsed.orders.R
 import ru.nyxsed.orders.model.CommandToken
 import ru.nyxsed.orders.model.GroupLayout
+import ru.nyxsed.orders.model.SpeedballToken
 import ru.nyxsed.orders.ui.theme.OrderColors
 
 @Composable
 fun TopHeaderBar(
     commandTokens: List<CommandToken>,
+    speedballTokens: List<SpeedballToken>,
     currentLayout: GroupLayout,
     isLossOfLt: Boolean,
     victoryPoints: Int,
     onResetOrders: () -> Unit,
     onFullReset: () -> Unit,
     onToggleCommandToken: (Int) -> Unit,
+    onToggleSpeedballToken: (Int) -> Unit,
     onSelectLayout: (GroupLayout) -> Unit,
     onToggleLossOfLt: () -> Unit,
     onChangeVictoryPoints: (Int) -> Unit,
@@ -301,7 +304,7 @@ fun TopHeaderBar(
                 }
             }
 
-            // Command Tokens Block
+            // Command Tokens & Speedball Tokens Block
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -310,6 +313,7 @@ fun TopHeaderBar(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Standard Command Tokens
                     commandTokens.forEach { token ->
                         val tokenColor by animateColorAsState(
                             targetValue = if (token.isSpent) {
@@ -334,6 +338,33 @@ fun TopHeaderBar(
                                 contentDescription = "Command Token ${token.id}",
                                 tint = MaterialTheme.colorScheme.surface,
                                 modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+
+                    // Speedball Chest Tokens (if any)
+                    speedballTokens.forEach { speedball ->
+                        val speedballColor by animateColorAsState(
+                            targetValue = if (speedball.isSpent) {
+                                OrderColors.CommandTokenSpent
+                            } else {
+                                OrderColors.SpeedballThumb
+                            },
+                            animationSpec = tween(durationMillis = 300),
+                            label = "speedball_color"
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(CircleShape)
+                                .background(speedballColor)
+                                .clickable { onToggleSpeedballToken(speedball.id) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "📦",
+                                fontSize = 18.sp
                             )
                         }
                     }

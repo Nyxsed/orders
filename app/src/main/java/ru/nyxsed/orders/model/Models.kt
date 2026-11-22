@@ -37,13 +37,20 @@ data class CommandToken(
     val isSpent: Boolean = false
 )
 
+data class SpeedballToken(
+    val id: Int,
+    val isSpent: Boolean = false
+)
+
 data class AppState(
     val groups: List<OrderGroup>,
     val commandTokens: List<CommandToken>,
     val layout: GroupLayout = GroupLayout.VERTICAL,
     val nextOrderId: Int = 1,
     val isLossOfLt: Boolean = false,
-    val victoryPoints: Int = 0
+    val victoryPoints: Int = 0,
+    val speedballTokens: List<SpeedballToken> = emptyList(),
+    val convertedFromRegularIds: Set<Int> = emptySet()
 ) {
     fun toBundle(): Bundle {
         return Bundle().apply {
@@ -53,6 +60,8 @@ data class AppState(
             putInt(KEY_VICTORY_POINTS, victoryPoints)
 
             putBooleanArray(KEY_COMMAND_TOKENS, commandTokens.map { it.isSpent }.toBooleanArray())
+            putBooleanArray(KEY_SPEEDBALL_TOKENS, speedballTokens.map { it.isSpent }.toBooleanArray())
+            putIntArray(KEY_CONVERTED_IDS, convertedFromRegularIds.toIntArray())
 
             groups.forEachIndexed { index, group ->
                 putIntArray("g_${index}_ids", group.orders.map { it.id }.toIntArray())
@@ -77,6 +86,19 @@ data class AppState(
             tokensArray.put(tokenObj)
         }
         json.put("commandTokens", tokensArray)
+
+        val speedballArray = JSONArray()
+        speedballTokens.forEach { token ->
+            val tokenObj = JSONObject()
+            tokenObj.put("id", token.id)
+            tokenObj.put("isSpent", token.isSpent)
+            speedballArray.put(tokenObj)
+        }
+        json.put("speedballTokens", speedballArray)
+
+        val convertedArray = JSONArray()
+        convertedFromRegularIds.forEach { convertedArray.put(it) }
+        json.put("convertedFromRegularIds", convertedArray)
 
         val groupsArray = JSONArray()
         groups.forEach { group ->
@@ -105,11 +127,14 @@ data class AppState(
         private const val KEY_LAYOUT = "key_layout"
         private const val KEY_NEXT_ORDER_ID = "key_next_order_id"
         private const val KEY_COMMAND_TOKENS = "key_command_tokens"
+        private const val KEY_SPEEDBALL_TOKENS = "key_speedball_tokens"
+        private const val KEY_CONVERTED_IDS = "key_converted_ids"
         private const val KEY_LOSS_OF_LT = "key_loss_of_lt"
         private const val KEY_VICTORY_POINTS = "key_victory_points"
 
         fun createInitialState(): AppState {
-            val initialTokens = (1..MAX_COMMAND_TOKENS).map { CommandToken(id = it, isSpent = false) }
+            // 4 unspent (index 1..4), 1 spent (index 5)
+            val initialTokens = (1..MAX_COMMAND_TOKENS).map { CommandToken(id = it, isSpent = it > 4) }
             val group1 = OrderGroup(id = 1, orders = emptyList())
             val group2 = OrderGroup(id = 2, orders = emptyList())
             return AppState(
@@ -118,7 +143,9 @@ data class AppState(
                 layout = GroupLayout.VERTICAL,
                 nextOrderId = 1,
                 isLossOfLt = false,
-                victoryPoints = 0
+                victoryPoints = 0,
+                speedballTokens = emptyList(),
+                convertedFromRegularIds = emptySet()
             )
         }
 
@@ -140,11 +167,25 @@ data class AppState(
                     )
                 }.take(MAX_COMMAND_TOKENS).let { list ->
                     if (list.isEmpty()) {
-                        (1..MAX_COMMAND_TOKENS).map { CommandToken(id = it, isSpent = false) }
+                        (1..MAX_COMMAND_TOKENS).map { CommandToken(id = it, isSpent = it > 4) }
                     } else {
                         list
                     }
                 }
+
+                val speedballArray = json.optJSONArray("speedballTokens") ?: JSONArray()
+                val speedballTokens = (0 until speedballArray.length()).map { i ->
+                    val tokenObj = speedballArray.getJSONObject(i)
+                    SpeedballToken(
+                        id = tokenObj.optInt("id", i + 1),
+                        isSpent = tokenObj.optBoolean("isSpent", false)
+                    )
+                }
+
+                val convertedArray = json.optJSONArray("convertedFromRegularIds") ?: JSONArray()
+                val convertedFromRegularIds = (0 until convertedArray.length()).map { i ->
+                    convertedArray.getInt(i)
+                }.toSet()
 
                 val groupsArray = json.optJSONArray("groups") ?: JSONArray()
                 val groups = (0 until groupsArray.length()).map { i ->
@@ -181,7 +222,9 @@ data class AppState(
                     layout = layout,
                     nextOrderId = nextOrderId,
                     isLossOfLt = isLossOfLt,
-                    victoryPoints = victoryPoints
+                    victoryPoints = victoryPoints,
+                    speedballTokens = speedballTokens,
+                    convertedFromRegularIds = convertedFromRegularIds
                 )
             } catch (e: Exception) {
                 return null
@@ -200,9 +243,17 @@ data class AppState(
             val commandTokens = (1..MAX_COMMAND_TOKENS).map { index ->
                 CommandToken(
                     id = index,
-                    isSpent = tokenSpents.getOrElse(index - 1) { false }
+                    isSpent = tokenSpents.getOrElse(index - 1) { index > 4 }
                 )
             }
+
+            val speedballSpents = bundle.getBooleanArray(KEY_SPEEDBALL_TOKENS) ?: booleanArrayOf()
+            val speedballTokens = speedballSpents.mapIndexed { index, isSpent ->
+                SpeedballToken(id = index + 1, isSpent = isSpent)
+            }
+
+            val convertedIdsArray = bundle.getIntArray(KEY_CONVERTED_IDS) ?: intArrayOf()
+            val convertedFromRegularIds = convertedIdsArray.toSet()
 
             val groups = (0..1).map { index ->
                 val ids = bundle.getIntArray("g_${index}_ids") ?: intArrayOf()
@@ -232,7 +283,9 @@ data class AppState(
                 layout = layout,
                 nextOrderId = nextOrderId,
                 isLossOfLt = isLossOfLt,
-                victoryPoints = victoryPoints
+                victoryPoints = victoryPoints,
+                speedballTokens = speedballTokens,
+                convertedFromRegularIds = convertedFromRegularIds
             )
         }
     }

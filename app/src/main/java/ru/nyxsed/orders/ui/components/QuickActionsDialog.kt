@@ -25,7 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -34,6 +34,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -52,7 +53,7 @@ fun QuickActionsDialog(
     onMoveOrder: (fromGroupId: Int, toGroupId: Int) -> Unit
 ) {
     val unspentTokensCount = appState.commandTokens.count { !it.isSpent }
-    var selectedTab by remember { mutableStateOf(0) } // 0: Quick Actions, 1: Speedball Hint
+    var selectedTab by remember { mutableIntStateOf(0) } // 0: Quick Actions, 1: Speedball Hint
 
     Dialog(onDismissRequest = onDismiss) {
         Surface(
@@ -116,7 +117,7 @@ fun QuickActionsDialog(
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         ) else ButtonDefaults.outlinedButtonColors()
                     ) {
-                        Text("⚡ Действия", fontSize = 12.sp)
+                        Text("⚡ Действия", fontSize = 12.sp, maxLines = 1)
                     }
 
                     OutlinedButton(
@@ -126,7 +127,7 @@ fun QuickActionsDialog(
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         ) else ButtonDefaults.outlinedButtonColors()
                     ) {
-                        Text("📦 Speedball Drop", fontSize = 12.sp)
+                        Text("📦 Speedball", fontSize = 12.sp, maxLines = 1)
                     }
                 }
 
@@ -151,9 +152,11 @@ fun QuickActionsDialog(
                                 verticalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
                                 Text(
-                                    text = "🔄 Irregular ➔ Regular (+1 жетон)",
+                                    text = "🔄 Irregular ➔ Regular (-1 жетон)",
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp
+                                    fontSize = 13.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                                 Text(
                                     text = "Преобразует 1 нерегулярный приказ в регулярный",
@@ -210,7 +213,7 @@ fun QuickActionsDialog(
                                             containerColor = MaterialTheme.colorScheme.error
                                         )
                                     ) {
-                                        Text("Снять Loss of LT (-1 жетон)")
+                                        Text("Снять Loss of LT (-1 жетон)", maxLines = 1)
                                     }
                                 }
                             }
@@ -234,7 +237,9 @@ fun QuickActionsDialog(
                                 Text(
                                     text = "🔀 Перенос приказа между группами",
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 13.sp
+                                    fontSize = 13.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     OutlinedButton(
@@ -261,14 +266,16 @@ fun QuickActionsDialog(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = "Таблица вызова Speedball / Supply Drop",
+                            text = "Таблица вызова Speedball",
                             fontWeight = FontWeight.Bold,
-                            fontSize = 13.sp
+                            fontSize = 13.sp,
+                            maxLines = 1
                         )
                         Text(
-                            text = "При вызове сбрасывается контейнер припасов. Бросьте 1d6 (или d20):",
+                            text = "Сбрасывается контейнер припасов. Бросьте 1d6 (d20):",
                             fontSize = 11.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
                         )
 
                         // Drop Table Card
@@ -280,26 +287,26 @@ fun QuickActionsDialog(
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(12.dp),
+                                    .padding(10.dp),
                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 SpeedballTableRow(
-                                    dice = "d6: 1-2 (d20: 1-6)",
+                                    dice = "d6: 1-2 | d20: 1-6",
                                     icon = "💨",
-                                    title = "Smoke / Eclipse Pod",
-                                    desc = "Дымовая или Затмевающая граната"
+                                    title = "Smoke Pod",
+                                    desc = "Дымовая граната"
                                 )
                                 SpeedballTableRow(
-                                    dice = "d6: 3-4 (d20: 7-13)",
+                                    dice = "d6: 3-4 | d20: 7-13",
                                     icon = "💉",
                                     title = "Med-Kit Servo",
-                                    desc = "Автоматический медкит / лечебный пак"
+                                    desc = "Автоматический медкит"
                                 )
                                 SpeedballTableRow(
-                                    dice = "d6: 5-6 (d20: 14-20)",
+                                    dice = "d6: 5-6 | d20: 14-20",
                                     icon = "💣",
                                     title = "Heavy Ammo Pack",
-                                    desc = "Саплай / Патроны для тяжелого оружия"
+                                    desc = "Саплай / Тяжелые патроны"
                                 )
                             }
                         }
@@ -314,7 +321,7 @@ fun QuickActionsDialog(
                                 containerColor = OrderColors.CommandTokenThumb
                             )
                         ) {
-                            Text("📦 Вызвать Speedball (-1 жетон)")
+                            Text("📦 Speedball (-1 жетон)", maxLines = 1)
                         }
                     }
                 }
@@ -351,23 +358,23 @@ private fun SpeedballTableRow(
     ) {
         Box(
             modifier = Modifier
-                .size(36.dp)
+                .size(32.dp)
                 .clip(RoundedCornerShape(6.dp))
                 .background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center
         ) {
-            Text(icon, fontSize = 18.sp)
+            Text(icon, fontSize = 16.sp)
         }
-        Spacer(modifier = Modifier.width(10.dp))
+        Spacer(modifier = Modifier.width(8.dp))
         Column(modifier = Modifier.weight(1f)) {
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(title, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                Text(dice, fontSize = 10.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                Text(title, fontWeight = FontWeight.Bold, fontSize = 12.sp, maxLines = 1)
+                Text(dice, fontSize = 10.sp, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold, maxLines = 1)
             }
-            Text(desc, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(desc, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1)
         }
     }
 }

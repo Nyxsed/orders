@@ -19,6 +19,7 @@ import ru.nyxsed.orders.model.CommandToken
 import ru.nyxsed.orders.model.GroupLayout
 import ru.nyxsed.orders.model.Order
 import ru.nyxsed.orders.model.OrderType
+import ru.nyxsed.orders.model.SpeedballToken
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "orders_state_prefs")
 
@@ -143,7 +144,54 @@ class MainViewModel(
 
     fun toggleLossOfLt() {
         val currentState = _uiState.value
-        updateState(currentState.copy(isLossOfLt = !currentState.isLossOfLt))
+        setLossOfLtState(!currentState.isLossOfLt)
+    }
+
+    private fun setLossOfLtState(enable: Boolean) {
+        val currentState = _uiState.value
+        if (currentState.isLossOfLt == enable) return
+
+        if (enable) {
+            val regularIds = currentState.groups
+                .flatMap { g -> g.orders.filter { it.type == OrderType.REGULAR }.map { it.id } }
+                .toSet()
+            val updatedGroups = currentState.groups.map { group ->
+                val newOrders = group.orders.map { order ->
+                    if (order.type == OrderType.REGULAR) {
+                        order.copy(type = OrderType.IRREGULAR)
+                    } else {
+                        order
+                    }
+                }
+                group.copy(orders = newOrders)
+            }
+            updateState(
+                currentState.copy(
+                    groups = updatedGroups,
+                    isLossOfLt = true,
+                    convertedFromRegularIds = currentState.convertedFromRegularIds + regularIds
+                )
+            )
+        } else {
+            val idsToRestore = currentState.convertedFromRegularIds
+            val updatedGroups = currentState.groups.map { group ->
+                val newOrders = group.orders.map { order ->
+                    if (order.id in idsToRestore && order.type == OrderType.IRREGULAR) {
+                        order.copy(type = OrderType.REGULAR)
+                    } else {
+                        order
+                    }
+                }
+                group.copy(orders = newOrders)
+            }
+            updateState(
+                currentState.copy(
+                    groups = updatedGroups,
+                    isLossOfLt = false,
+                    convertedFromRegularIds = emptySet()
+                )
+            )
+        }
     }
 
     fun changeVictoryPoints(delta: Int) {
@@ -155,8 +203,10 @@ class MainViewModel(
     fun convertIrregularToRegular(groupId: Int): Boolean {
         val currentState = _uiState.value
         if (currentState.isLossOfLt) return false
-        val firstUnspentTokenIndex = currentState.commandTokens.indexOfFirst { !it.isSpent }
-        if (firstUnspentTokenIndex == -1) return false
+
+        // Spend the last available command token
+        val lastUnspentIndex = currentState.commandTokens.indexOfLast { !it.isSpent }
+        if (lastUnspentIndex == -1) return false
 
         val targetGroup = currentState.groups.firstOrNull { it.id == groupId } ?: return false
         val irregularIndex = targetGroup.orders.indexOfFirst { it.type == OrderType.IRREGULAR }
@@ -170,7 +220,7 @@ class MainViewModel(
             if (group.id == groupId) group.copy(orders = updatedOrders) else group
         }
         val updatedTokens = currentState.commandTokens.mapIndexed { index, token ->
-            if (index == firstUnspentTokenIndex) token.copy(isSpent = true) else token
+            if (index == lastUnspentIndex) token.copy(isSpent = true) else token
         }
 
         updateState(currentState.copy(groups = updatedGroups, commandTokens = updatedTokens))
@@ -179,20 +229,27 @@ class MainViewModel(
 
     fun cancelLossOfLtWithToken(): Boolean {
         val currentState = _uiState.value
-        val firstUnspentTokenIndex = currentState.commandTokens.indexOfFirst { !it.isSpent }
-        if (firstUnspentTokenIndex == -1) return false
+
+        // Spend the last available command token
+        val lastUnspentIndex = currentState.commandTokens.indexOfLast { !it.isSpent }
+        if (lastUnspentIndex == -1) return false
 
         val updatedTokens = currentState.commandTokens.mapIndexed { index, token ->
-            if (index == firstUnspentTokenIndex) token.copy(isSpent = true) else token
+            if (index == lastUnspentIndex) token.copy(isSpent = true) else token
         }
-        updateState(currentState.copy(commandTokens = updatedTokens, isLossOfLt = false))
+
+        // Apply turning Loss of LT off
+        _uiState.value = currentState.copy(commandTokens = updatedTokens)
+        setLossOfLtState(false)
         return true
     }
 
     fun moveOrderBetweenGroups(orderId: Int, fromGroupId: Int, toGroupId: Int): Boolean {
         val currentState = _uiState.value
-        val firstUnspentTokenIndex = currentState.commandTokens.indexOfFirst { !it.isSpent }
-        if (firstUnspentTokenIndex == -1) return false
+
+        // Spend the last available command token
+        val lastUnspentIndex = currentState.commandTokens.indexOfLast { !it.isSpent }
+        if (lastUnspentIndex == -1) return false
 
         val sourceGroup = currentState.groups.firstOrNull { it.id == fromGroupId } ?: return false
         val orderToMove = sourceGroup.orders.firstOrNull { it.id == orderId } ?: return false
@@ -205,7 +262,7 @@ class MainViewModel(
             }
         }
         val updatedTokens = currentState.commandTokens.mapIndexed { index, token ->
-            if (index == firstUnspentTokenIndex) token.copy(isSpent = true) else token
+            if (index == lastUnspentIndex) token.copy(isSpent = true) else token
         }
         updateState(currentState.copy(groups = updatedGroups, commandTokens = updatedTokens))
         return true
@@ -213,14 +270,38 @@ class MainViewModel(
 
     fun callSpeedball(): Boolean {
         val currentState = _uiState.value
-        val firstUnspentTokenIndex = currentState.commandTokens.indexOfFirst { !it.isSpent }
-        if (firstUnspentTokenIndex == -1) return false
+
+        // Spend the last available command token
+        val lastUnspentIndex = currentState.commandTokens.indexOfLast { !it.isSpent }
+        if (lastUnspentIndex == -1) return false
 
         val updatedTokens = currentState.commandTokens.mapIndexed { index, token ->
-            if (index == firstUnspentTokenIndex) token.copy(isSpent = true) else token
+            if (index == lastUnspentIndex) token.copy(isSpent = true) else token
         }
-        updateState(currentState.copy(commandTokens = updatedTokens))
+
+        val nextSpeedballId = (currentState.speedballTokens.maxOfOrNull { it.id } ?: 0) + 1
+        val newSpeedballToken = SpeedballToken(id = nextSpeedballId, isSpent = false)
+        val updatedSpeedballs = currentState.speedballTokens + newSpeedballToken
+
+        updateState(
+            currentState.copy(
+                commandTokens = updatedTokens,
+                speedballTokens = updatedSpeedballs
+            )
+        )
         return true
+    }
+
+    fun toggleSpeedballToken(tokenId: Int) {
+        val currentState = _uiState.value
+        val updatedSpeedballs = currentState.speedballTokens.map { token ->
+            if (token.id == tokenId) {
+                token.copy(isSpent = !token.isSpent)
+            } else {
+                token
+            }
+        }
+        updateState(currentState.copy(speedballTokens = updatedSpeedballs))
     }
 
     fun removeOrder(groupId: Int, type: OrderType) {
@@ -283,15 +364,24 @@ class MainViewModel(
             }
             group.copy(orders = resetOrdersList)
         }
-        updateState(currentState.copy(groups = updatedGroups))
+        val resetSpeedballs = currentState.speedballTokens.map { token ->
+            token.copy(isSpent = false)
+        }
+        updateState(
+            currentState.copy(
+                groups = updatedGroups,
+                speedballTokens = resetSpeedballs
+            )
+        )
     }
 
     fun fullReset() {
         val currentState = _uiState.value
+        // 4 unspent (index 1..4), 1 spent (index 5)
         val resetTokens = (1..AppState.MAX_COMMAND_TOKENS).map { index ->
             CommandToken(
                 id = index,
-                isSpent = index > 1
+                isSpent = index > 4
             )
         }
         val resetGroups = currentState.groups.map { group ->
@@ -303,7 +393,9 @@ class MainViewModel(
                 commandTokens = resetTokens,
                 nextOrderId = 1,
                 isLossOfLt = false,
-                victoryPoints = 0
+                victoryPoints = 0,
+                speedballTokens = emptyList(),
+                convertedFromRegularIds = emptySet()
             )
         )
     }

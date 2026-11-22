@@ -10,6 +10,7 @@ object OrderColors {
     val TacticalThumb = Color(0xFF9C27B0)
     val LieutenantThumb = Color(0xFF2196F3)
     val CommandTokenThumb = Color(0xFF00BCD4)
+    val SpeedballThumb = Color(0xFFFFB300)
 
     val TrackReadyBackground = Color(0xFF2E7D32)
     val TrackSpentBackground = Color(0xFFC62828)

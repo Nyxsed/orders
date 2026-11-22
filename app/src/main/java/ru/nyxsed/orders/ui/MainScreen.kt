@@ -37,12 +37,14 @@ fun MainScreen(
         topBar = {
             TopHeaderBar(
                 commandTokens = uiState.commandTokens,
+                speedballTokens = uiState.speedballTokens,
                 currentLayout = uiState.layout,
                 isLossOfLt = uiState.isLossOfLt,
                 victoryPoints = uiState.victoryPoints,
                 onResetOrders = { viewModel.resetOrders() },
                 onFullReset = { viewModel.fullReset() },
                 onToggleCommandToken = { viewModel.toggleCommandToken(it) },
+                onToggleSpeedballToken = { viewModel.toggleSpeedballToken(it) },
                 onSelectLayout = { viewModel.setLayout(it) },
                 onToggleLossOfLt = { viewModel.toggleLossOfLt() },
                 onChangeVictoryPoints = { viewModel.changeVictoryPoints(it) },

@@ -1,0 +1,157 @@
+<resources>
+    <string name="app_name">Orders</string>
+
+    <!-- Верхняя панель -->
+    <string name="reset_orders">СБРОС ПРИКАЗОВ</string>
+    <string name="reset_orders_description">Сбросить приказы</string>
+    <string name="layout_vertical_description">Вертикальный режим</string>
+    <string name="layout_horizontal_description">Горизонтальный режим</string>
+    <string name="victory_points_label">🏆 VP</string>
+    <string name="loss_of_lt">Loss of LT</string>
+    <string name="loss_of_lt_active">LOSS OF LT</string>
+    <string name="help">Помощь</string>
+    <string name="command_token_description">Командный токен %1$d</string>
+    <string name="victory_points_increase">Увеличить победные очки</string>
+    <string name="victory_points_decrease">Уменьшить победные очки</string>
+
+    <!-- Диалог справки -->
+    <string name="help_title">Справка</string>
+    <string name="help_tab_command_tokens">📜 Токены</string>
+    <string name="help_tab_speedball">📦 Speedball</string>
+    <string name="help_tab_booty">💰 Booty</string>
+    <string name="help_tab_metachemistry">🧪 Metachemistry</string>
+    <string name="help_close">Закрыть</string>
+    <string name="help_d20_format">d20: %1$s</string>
+
+    <!-- Командные токены -->
+    <string name="help_command_tokens_title">Командные токены</string>
+
+    <string name="help_strategic_title">🧠 Стратегическое</string>
+    <string name="help_strategic_limit">Не более 2 токенов за игру: 1 на Procedural и 1 на Logistical.</string>
+    <string name="help_procedural_label">PROCEDURAL</string>
+    <string name="help_if_first">Если ходите первым</string>
+    <string name="help_if_first_title">Отложить бойца</string>
+    <string name="help_if_first_desc">Потратьте 1 токен при развёртывании: отложите бойца (с периферией) и выставьте его после армии противника.</string>
+    <string name="help_if_second">Если ходите вторым</string>
+    <string name="help_second_remove_title">−2 Regular Order</string>
+    <string name="help_second_remove_desc">Уберите 2 Regular Order из пула приказов противника на этот ход (если у него больше 10 приказов).</string>
+    <string name="help_second_limit_title">Лимит токенов врагу</string>
+    <string name="help_second_limit_desc">Противник может использовать не более 1 командного токена в его первый ход.</string>
+    <string name="help_second_suppressive_title">Suppressive Fire</string>
+    <string name="help_second_suppressive_desc">Разрешите одному своему бойцу активировать Suppressive Fire.</string>
+    <string name="help_logistical_title">Logistical</string>
+    <string name="help_logistical_desc">После развёртывания обеих армий получите 2 жетона Speedball.</string>
+
+    <string name="help_operational_title">🎯 Operational</string>
+    <string name="help_operational_note">В свой активный ход: 1 токен = 1 эффект, без лимита.</string>
+    <string name="help_coordinated_title">Скоординированный приказ</string>
+    <string name="help_coordinated_desc">Объявите приказ, потратив 1 Regular Order из пула боевой группы участников.</string>
+    <string name="help_guts_title">Контроль Guts Roll</string>
+    <string name="help_guts_desc">Авто-успех или авто-провал Guts Roll, игнорируя кубик и навыки бойца.</string>
+    <string name="help_convert_title">Конвертация приказа</string>
+    <string name="help_convert_desc">Превратите 1 Irregular Order в Regular на этот ход.</string>
+    <string name="help_retreat_title">Иммунитет к Retreat!</string>
+    <string name="help_retreat_desc">Один боец игнорирует эффекты Retreat! до конца игры.</string>
+    <string name="help_doctor_title">Переброс WIP: Doctor</string>
+    <string name="help_doctor_desc">Перебросьте провал WIP у бойца с Cube; враг не получает нового ARO.</string>
+    <string name="help_engineer_title">Переброс WIP: Engineer</string>
+    <string name="help_engineer_desc">Перебросьте провал WIP у бойца с Remote Presence.</string>
+    <string name="help_fireteam_title">Создание файртима</string>
+    <string name="help_fireteam_desc">Создайте файртим, разместив жетон лидера рядом с подходящим бойцом.</string>
+
+    <string name="help_executive_title">🛠️ Executive</string>
+    <string name="help_executive_note">В соответствующую фазу своего тактического хода.</string>
+    <string name="help_regroup_title">Перегруппировка</string>
+    <string name="help_regroup_desc">Навсегда переведите бойца (с периферией) в другую боевую группу — до 10 членов.</string>
+    <string name="help_possessed_title">Снятие одержимости</string>
+    <string name="help_possessed_desc">Отмените состояние Possessed у дружественного бойца.</string>
+
+    <!-- Speedball -->
+    <string name="help_speedball_title">Speedball</string>
+    <string name="help_speedball_note">Combat Jump (PH 14)</string>
+    <string name="help_first_token_title">Первый жетон</string>
+    <string name="help_first_token_desc">Игрок выбирает предмет из таблицы</string>
+    <string name="help_second_token_title">Второй жетон</string>
+    <string name="help_second_token_desc">Игрок бросает d20 и сверяется с таблицей</string>
+    <string name="help_vitapack_title">VitaPack</string>
+    <string name="help_vitapack_desc">Отменяет Unconscious у союзника с Vitality, снимая 1 рану (Short Skill в силуэт-контакте).</string>
+    <string name="help_autorepair_title">AutoRepairS</string>
+    <string name="help_autorepair_desc">Отменяет Unconscious у союзника со STR, снимая 1–2 раны (Short Skill в силуэт-контакте).</string>
+    <string name="help_switch_on_title">Switch On</string>
+    <string name="help_switch_on_desc">Снимает Immobilized A/B, Isolated или Stunned с союзника (Short Skill в силуэт-контакте).</string>
+    <string name="help_jetpack_title">Jetpack (S:2)</string>
+    <string name="help_jetpack_desc">Один раз Super-Jump (Jet Propulsion) в течение одного приказа. Только для силуэта 2.</string>
+    <string name="help_overkill_title">Overkill</string>
+    <string name="help_overkill_desc">На выбор: снять Unloaded и восстановить Disposable или BS Attack (SR-1) на один приказ.</string>
+    <string name="help_nanoshield_title">NanoShield</string>
+    <string name="help_nanoshield_desc">+2 MOD ко всем Saving Rolls в шаге Resolution текущего приказа.</string>
+    <string name="help_speedball_restrictions">Предметы одноразовые и непередаваемые. У бойца не может быть больше одного предмета Speedball одновременно.</string>
+
+    <!-- Booty -->
+
+    <string name="help_booty_title">Booty</string>
+    <string name="help_booty_note">Один бросок d20 сразу после выставления бойца. Предмет дополняет снаряжение, не заменяя его.</string>
+    <string name="help_booty_arm1_title">+1 ARM</string>
+    <string name="help_booty_arm1_desc">Боец получает +1 к броне</string>
+    <string name="help_booty_flamethrower_title">Light Flamethrower</string>
+    <string name="help_booty_flamethrower_desc">Лёгкий огнемёт</string>
+    <string name="help_booty_grenades_title">Grenades</string>
+    <string name="help_booty_grenades_desc">Стандартные гранаты</string>
+    <string name="help_booty_da_cc_title">DA CC Weapon</string>
+    <string name="help_booty_da_cc_desc">Оружие ближнего боя с боеприпасом DA</string>
+    <string name="help_booty_visor_title">Multispectral Visor L1</string>
+    <string name="help_booty_visor_desc">Мультиспектральный визор уровня 1</string>
+    <string name="help_booty_exp_cc_title">EXP CC Weapon</string>
+    <string name="help_booty_exp_cc_desc">Оружие ближнего боя с боеприпасом EXP</string>
+    <string name="help_booty_adhesive_title">Adhesive Launcher Rifle</string>
+    <string name="help_booty_adhesive_desc">Винтовка с гранатомётом для клейких боеприпасов</string>
+    <string name="help_booty_immunity_ap_title">Immunity (AP) / +2 ARM</string>
+    <string name="help_booty_immunity_ap_desc">TAG: иммунитет к AP. Остальные: +2 к броне</string>
+    <string name="help_booty_panzerfaust_title">Panzerfaust</string>
+    <string name="help_booty_panzerfaust_desc">Одноразовый противотанковый гранатомёт</string>
+    <string name="help_booty_monofilament_title">Monofilament CC Weapon</string>
+    <string name="help_booty_monofilament_desc">Оружие ближнего боя с монофиламентным боеприпасом</string>
+    <string name="help_booty_mov84_title">MOV 8-4</string>
+    <string name="help_booty_mov84_desc">Боец получает профиль движения 8-4</string>
+    <string name="help_booty_shock_title">BS Attack (Shock) / MULTI Rifle</string>
+    <string name="help_booty_shock_desc">TAG: Shock для BS Attack. Остальные: MULTI Rifle</string>
+    <string name="help_booty_sniper_title">MULTI Sniper Rifle</string>
+    <string name="help_booty_sniper_desc">Мульти-снайперская винтовка</string>
+    <string name="help_booty_immunity_arm_title">Immunity (ARM) / +4 ARM</string>
+    <string name="help_booty_immunity_arm_desc">TAG: иммунитет к ARM. Остальные: +4 к броне</string>
+    <string name="help_booty_mimetism_title">Mimetism (-6)</string>
+    <string name="help_booty_mimetism_desc">−6 к броскам обнаружения/стрельбы по носителю</string>
+    <string name="help_booty_hmg_title">BS Attack (+1 B) / HMG</string>
+    <string name="help_booty_hmg_desc">TAG: +1 кубик к BS Attack. Остальные: HMG</string>
+    <string name="help_booty_tag_note">Для 12, 16, 18 и 20 эффект зависит от типа бойца: сначала вариант для TAG, иначе — для остальных.</string>
+    <string name="help_free_roll_note">Бесплатный бросок при развёртывании — командные токены не тратятся</string>
+
+    <!-- Metachemistry -->
+    <string name="help_metachemistry_title">Metachemistry</string>
+    <string name="help_metachemistry_note">Один бросок d20 сразу после выставления бойца. Результат дополняет навыки и характеристики.</string>
+    <string name="help_meta_ph3_title">+3 PH</string>
+    <string name="help_meta_ph3_desc">+3 к физической характеристике (PH)</string>
+    <string name="help_meta_superjump_title">Super-Jump</string>
+    <string name="help_meta_superjump_desc">Super-jump</string>
+    <string name="help_meta_regen_title">Regeneration</string>
+    <string name="help_meta_regen_desc">В начале активного хода можно восстановить 1 рану (с ограничениями)</string>
+    <string name="help_meta_climbing_title">Climbing Plus</string>
+    <string name="help_meta_climbing_desc">Улучшенное лазание</string>
+    <string name="help_meta_mov84_title">MOV 8-4</string>
+    <string name="help_meta_mov84_desc">Профиль движения 8-4</string>
+    <string name="help_meta_bts6_title">+6 BTS</string>
+    <string name="help_meta_bts6_desc">+6 к биотехнологической защите (BTS)</string>
+    <string name="help_meta_nwi_title">No Wound Incapacitation</string>
+    <string name="help_meta_nwi_desc">Игнорирует Unconscious при получении раны (как Dogged, но без MOD)</string>
+    <string name="help_meta_arm_immunity_title">+1 ARM + Immunity (ARM)</string>
+    <string name="help_meta_arm_immunity_desc">+1 к броне и иммунитет к боеприпасам типа ARM</string>
+    <string name="help_meta_dogged_title">Dogged + Immunity (Enhanced)</string>
+    <string name="help_meta_dogged_desc">Dogged (действует при смертельной ране до конца хода) + иммунитет к Enhanced</string>
+    <string name="help_meta_mov64_superjump_title">MOV 6-4 + Super-Jump</string>
+    <string name="help_meta_mov64_superjump_desc">Профиль движения 6-4 и Super-Jump</string>
+    <string name="help_meta_mov84_climbing_title">MOV 8-4 + Climbing Plus</string>
+    <string name="help_meta_mov84_climbing_desc">Профиль движения 8-4 и Climbing Plus</string>
+    <string name="help_meta_ph3_regen_title">+3 PH + Regeneration</string>
+    <string name="help_meta_ph3_regen_desc">+3 к PH и навык Regeneration</string>
+    <string name="help_meta_note">Работает одинаково для всех типов бойцов и не заменяет существующие навыки</string>
+</resources>

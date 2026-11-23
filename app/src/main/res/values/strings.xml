@@ -1,3 +1,156 @@
 <resources>
     <string name="app_name">Orders</string>
+
+    <!-- Top header -->
+    <string name="reset_orders">RESET ORDERS</string>
+    <string name="reset_orders_description">Reset Orders</string>
+    <string name="layout_vertical_description">Vertical Layout</string>
+    <string name="layout_horizontal_description">Horizontal Layout</string>
+    <string name="victory_points_label">🏆 VP</string>
+    <string name="loss_of_lt">Loss of LT</string>
+    <string name="loss_of_lt_active">LOSS OF LT</string>
+    <string name="help">Help</string>
+    <string name="command_token_description">Command Token %1$d</string>
+    <string name="victory_points_increase">Increase victory points</string>
+    <string name="victory_points_decrease">Decrease victory points</string>
+
+    <!-- Help dialog -->
+    <string name="help_title">Reference</string>
+    <string name="help_tab_command_tokens">📜 Cmd Tokens</string>
+    <string name="help_tab_speedball">📦 Speedball</string>
+    <string name="help_tab_booty">💰 Booty</string>
+    <string name="help_tab_metachemistry">🧪 Metachemistry</string>
+    <string name="help_close">Close</string>
+    <string name="help_d20_format">d20: %1$s</string>
+
+    <!-- Command tokens -->
+    <string name="help_command_tokens_title">Command Tokens</string>
+
+    <string name="help_strategic_title">🧠 Strategic</string>
+    <string name="help_strategic_limit">No more than 2 tokens per game: 1 Procedural and 1 Logistical.</string>
+    <string name="help_procedural_label">PROCEDURAL</string>
+    <string name="help_if_first">If you go first</string>
+    <string name="help_if_first_title">Hold back a trooper</string>
+    <string name="help_if_first_desc">Spend 1 token during deployment: hold back a trooper (and their peripherals) and deploy them after the opponent\'s army.</string>
+    <string name="help_if_second">If you go second</string>
+    <string name="help_second_remove_title">−2 Regular Orders</string>
+    <string name="help_second_remove_desc">Remove 2 Regular Orders from the opponent\'s order pool for this turn (only if they have more than 10 orders).</string>
+    <string name="help_second_limit_title">Limit enemy tokens</string>
+    <string name="help_second_limit_desc">The opponent may use no more than 1 command token during their first turn.</string>
+    <string name="help_second_suppressive_title">Suppressive Fire</string>
+    <string name="help_second_suppressive_desc">Allow one of your troopers to activate Suppressive Fire.</string>
+    <string name="help_logistical_title">Logistical</string>
+    <string name="help_logistical_desc">After both armies are deployed, gain 2 Speedball tokens.</string>
+
+    <string name="help_operational_title">🎯 Operational</string>
+    <string name="help_operational_note">During your active turn: 1 token = 1 effect, no limit.</string>
+    <string name="help_coordinated_title">Coordinated Order</string>
+    <string name="help_coordinated_desc">Declare a coordinated order by spending 1 Regular Order from the participating combat group\'s pool.</string>
+    <string name="help_guts_title">Guts Roll control</string>
+    <string name="help_guts_desc">Automatically pass or fail a Guts Roll, ignoring the die and the trooper\'s skills.</string>
+    <string name="help_convert_title">Order conversion</string>
+    <string name="help_convert_desc">Convert 1 Irregular Order into a Regular Order for this turn.</string>
+    <string name="help_retreat_title">Retreat! immunity</string>
+    <string name="help_retreat_desc">One trooper ignores the effects of Retreat! until the end of the game.</string>
+    <string name="help_doctor_title">WIP reroll: Doctor</string>
+    <string name="help_doctor_desc">Reroll a failed WIP roll for a trooper with Cube; the enemy does not get a new ARO.</string>
+    <string name="help_engineer_title">WIP reroll: Engineer</string>
+    <string name="help_engineer_desc">Reroll a failed WIP roll for a trooper with Remote Presence.</string>
+    <string name="help_fireteam_title">Create a fireteam</string>
+    <string name="help_fireteam_desc">Create a fireteam by placing the leader token next to a suitable trooper.</string>
+
+    <string name="help_executive_title">🛠️ Executive</string>
+    <string name="help_executive_note">During the corresponding phase of your tactical turn.</string>
+    <string name="help_regroup_title">Regrouping</string>
+    <string name="help_regroup_desc">Permanently move a trooper (and their peripherals) to another combat group — up to 10 members.</string>
+    <string name="help_possessed_title">Remove Possession</string>
+    <string name="help_possessed_desc">Cancel the Possessed state on a friendly trooper.</string>
+
+    <!-- Speedball -->
+    <string name="help_speedball_title">Speedball</string>
+    <string name="help_speedball_note">Combat Jump (PH 14)</string>
+    <string name="help_first_token_title">First token</string>
+    <string name="help_first_token_desc">The player chooses an item from the table</string>
+    <string name="help_second_token_title">Second token</string>
+    <string name="help_second_token_desc">The player rolls d20 and checks the table</string>
+    <string name="help_vitapack_title">VitaPack</string>
+    <string name="help_vitapack_desc">Cancels Unconscious on an ally with Vitality, removing 1 wound (Short Skill in silhouette contact).</string>
+    <string name="help_autorepair_title">AutoRepairS</string>
+    <string name="help_autorepair_desc">Cancels Unconscious on an ally with STR, removing 1–2 wounds (Short Skill in silhouette contact).</string>
+    <string name="help_switch_on_title">Switch On</string>
+    <string name="help_switch_on_desc">Removes Immobilized A/B, Isolated, or Stunned from an ally (Short Skill in silhouette contact).</string>
+    <string name="help_jetpack_title">Jetpack (S:2)</string>
+    <string name="help_jetpack_desc">Once per order, the bearer may use Super-Jump (Jet Propulsion). Silhouette 2 only.</string>
+    <string name="help_overkill_title">Overkill</string>
+    <string name="help_overkill_desc">Choose: remove Unloaded and restore all Disposable consumables, or gain BS Attack (SR-1) for one order.</string>
+    <string name="help_nanoshield_title">NanoShield</string>
+    <string name="help_nanoshield_desc">+2 MOD to all Saving Rolls in the Resolution step of the current order.</string>
+    <string name="help_speedball_restrictions">Items are single-use and non-transferable. A trooper cannot have more than one Speedball item at a time.</string>
+
+    <!-- Booty -->
+    <string name="help_booty_title">Booty</string>
+    <string name="help_booty_note">One d20 roll right after the trooper is deployed. The item adds to the equipment, it does not replace it.</string>
+    <string name="help_booty_arm1_title">+1 ARM</string>
+    <string name="help_booty_arm1_desc">The trooper gains +1 ARM</string>
+    <string name="help_booty_flamethrower_title">Light Flamethrower</string>
+    <string name="help_booty_flamethrower_desc">Light flamethrower</string>
+    <string name="help_booty_grenades_title">Grenades</string>
+    <string name="help_booty_grenades_desc">Standard grenades</string>
+    <string name="help_booty_da_cc_title">DA CC Weapon</string>
+    <string name="help_booty_da_cc_desc">Close combat weapon with DA ammunition</string>
+    <string name="help_booty_visor_title">Multispectral Visor L1</string>
+    <string name="help_booty_visor_desc">Level 1 multispectral visor</string>
+    <string name="help_booty_exp_cc_title">EXP CC Weapon</string>
+    <string name="help_booty_exp_cc_desc">Close combat weapon with EXP ammunition</string>
+    <string name="help_booty_adhesive_title">Adhesive Launcher Rifle</string>
+    <string name="help_booty_adhesive_desc">Rifle with a grenade launcher firing adhesive ammunition</string>
+    <string name="help_booty_immunity_ap_title">Immunity (AP) / +2 ARM</string>
+    <string name="help_booty_immunity_ap_desc">TAG: Immunity (AP). Others: +2 ARM</string>
+    <string name="help_booty_panzerfaust_title">Panzerfaust</string>
+    <string name="help_booty_panzerfaust_desc">Single-use anti-tank rocket launcher</string>
+    <string name="help_booty_monofilament_title">Monofilament CC Weapon</string>
+    <string name="help_booty_monofilament_desc">Close combat weapon with monofilament ammunition</string>
+    <string name="help_booty_mov84_title">MOV 8-4</string>
+    <string name="help_booty_mov84_desc">The trooper gains the 8-4 movement profile</string>
+    <string name="help_booty_shock_title">BS Attack (Shock) / MULTI Rifle</string>
+    <string name="help_booty_shock_desc">TAG: Shock ammunition for BS Attack. Others: MULTI Rifle</string>
+    <string name="help_booty_sniper_title">MULTI Sniper Rifle</string>
+    <string name="help_booty_sniper_desc">MULTI sniper rifle</string>
+    <string name="help_booty_immunity_arm_title">Immunity (ARM) / +4 ARM</string>
+    <string name="help_booty_immunity_arm_desc">TAG: Immunity (ARM). Others: +4 ARM</string>
+    <string name="help_booty_mimetism_title">Mimetism (-6)</string>
+    <string name="help_booty_mimetism_desc">−6 to enemy detection/shooting rolls against the bearer</string>
+    <string name="help_booty_hmg_title">BS Attack (+1 B) / HMG</string>
+    <string name="help_booty_hmg_desc">TAG: +1 die for BS Attack. Others: HMG</string>
+    <string name="help_booty_tag_note">For results 12, 16, 18, and 20 the effect depends on the trooper type: use the TAG variant first if the trooper is a TAG, otherwise the other variant.</string>
+    <string name="help_free_roll_note">Free roll during deployment — no command tokens are spent</string>
+
+    <!-- Metachemistry -->
+    <string name="help_metachemistry_title">Metachemistry</string>
+    <string name="help_metachemistry_note">One d20 roll right after the trooper is deployed. The result adds to existing skills and characteristics.</string>
+    <string name="help_meta_ph3_title">+3 PH</string>
+    <string name="help_meta_ph3_desc">+3 to the Physique (PH) characteristic</string>
+    <string name="help_meta_superjump_title">Super-Jump</string>
+    <string name="help_meta_superjump_desc">Super-jump</string>
+    <string name="help_meta_regen_title">Regeneration</string>
+    <string name="help_meta_regen_desc">At the start of the active turn, you may restore 1 wound (with restrictions)</string>
+    <string name="help_meta_climbing_title">Climbing Plus</string>
+    <string name="help_meta_climbing_desc">Improved climbing</string>
+    <string name="help_meta_mov84_title">MOV 8-4</string>
+    <string name="help_meta_mov84_desc">8-4 movement profile</string>
+    <string name="help_meta_bts6_title">+6 BTS</string>
+    <string name="help_meta_bts6_desc">+6 to Biotechnological Shield (BTS)</string>
+    <string name="help_meta_nwi_title">No Wound Incapacitation</string>
+    <string name="help_meta_nwi_desc">Ignores Unconscious when taking a wound (works like Dogged, but without MOD)</string>
+    <string name="help_meta_arm_immunity_title">+1 ARM + Immunity (ARM)</string>
+    <string name="help_meta_arm_immunity_desc">+1 ARM and Immunity to ARM ammunition</string>
+    <string name="help_meta_dogged_title">Dogged + Immunity (Enhanced)</string>
+    <string name="help_meta_dogged_desc">Dogged (the trooper may keep acting while mortally wounded until the end of the turn) and Immunity (Enhanced)</string>
+    <string name="help_meta_mov64_superjump_title">MOV 6-4 + Super-Jump</string>
+    <string name="help_meta_mov64_superjump_desc">6-4 movement profile and Super-Jump</string>
+    <string name="help_meta_mov84_climbing_title">MOV 8-4 + Climbing Plus</string>
+    <string name="help_meta_mov84_climbing_desc">8-4 movement profile and Climbing Plus</string>
+    <string name="help_meta_ph3_regen_title">+3 PH + Regeneration</string>
+    <string name="help_meta_ph3_regen_desc">+3 PH and the Regeneration skill</string>
+    <string name="help_meta_note">Works the same for all trooper types and does not replace existing skills</string>
 </resources>

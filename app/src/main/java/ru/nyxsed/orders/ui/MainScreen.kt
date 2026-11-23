@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import ru.nyxsed.orders.model.GroupLayout
 import ru.nyxsed.orders.ui.components.GroupSection
-import ru.nyxsed.orders.ui.components.QuickActionsDialog
+import ru.nyxsed.orders.ui.components.HelpDialog
 import ru.nyxsed.orders.ui.components.TopHeaderBar
 
 @Composable
@@ -30,7 +30,7 @@ fun MainScreen(
     viewModel: MainViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var showQuickActionsDialog by remember { mutableStateOf(false) }
+    var showHelpDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -48,7 +48,7 @@ fun MainScreen(
                 onSelectLayout = { viewModel.setLayout(it) },
                 onToggleLossOfLt = { viewModel.toggleLossOfLt() },
                 onChangeVictoryPoints = { viewModel.changeVictoryPoints(it) },
-                onOpenQuickActions = { showQuickActionsDialog = true }
+                onOpenHelp = { showHelpDialog = true }
             )
         }
     ) { innerPadding ->
@@ -95,25 +95,9 @@ fun MainScreen(
             }
         }
 
-        if (showQuickActionsDialog) {
-            QuickActionsDialog(
-                appState = uiState,
-                onDismiss = { showQuickActionsDialog = false },
-                onConvertIrregular = { groupId ->
-                    viewModel.convertIrregularToRegular(groupId)
-                },
-                onCancelLossOfLt = {
-                    viewModel.cancelLossOfLtWithToken()
-                },
-                onCallSpeedball = {
-                    viewModel.callSpeedball()
-                },
-                onMoveOrder = { fromGroup, toGroup ->
-                    val sourceOrders = uiState.groups.find { it.id == fromGroup }?.orders ?: emptyList()
-                    if (sourceOrders.isNotEmpty()) {
-                        viewModel.moveOrderBetweenGroups(sourceOrders.last().id, fromGroup, toGroup)
-                    }
-                }
+        if (showHelpDialog) {
+            HelpDialog(
+                onDismiss = { showHelpDialog = false }
             )
         }
     }

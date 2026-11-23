@@ -270,30 +270,6 @@ class MainViewModel(
         return true
     }
 
-    fun callSpeedball(): Boolean {
-        val currentState = _uiState.value
-
-        // Spend the last available command token
-        val lastUnspentIndex = currentState.commandTokens.indexOfLast { !it.isSpent }
-        if (lastUnspentIndex == -1) return false
-
-        val updatedTokens = currentState.commandTokens.mapIndexed { index, token ->
-            if (index == lastUnspentIndex) token.copy(isSpent = true) else token
-        }
-
-        val nextSpeedballId = (currentState.speedballTokens.maxOfOrNull { it.id } ?: 0) + 1
-        val newSpeedballToken = SpeedballToken(id = nextSpeedballId, isSpent = false)
-        val updatedSpeedballs = currentState.speedballTokens + newSpeedballToken
-
-        updateState(
-            currentState.copy(
-                commandTokens = updatedTokens,
-                speedballTokens = updatedSpeedballs
-            )
-        )
-        return true
-    }
-
     fun toggleSpeedballToken(tokenId: Int) {
         val currentState = _uiState.value
         val updatedSpeedballs = currentState.speedballTokens.map { token ->
@@ -302,6 +278,8 @@ class MainViewModel(
             } else {
                 token
             }
+        }.ifEmpty {
+            listOf(SpeedballToken(id = 1, isSpent = true))
         }
         updateState(currentState.copy(speedballTokens = updatedSpeedballs))
     }
@@ -366,15 +344,8 @@ class MainViewModel(
             }
             group.copy(orders = resetOrdersList)
         }
-        val resetSpeedballs = currentState.speedballTokens.map { token ->
-            token.copy(isSpent = false)
-        }
-        updateState(
-            currentState.copy(
-                groups = updatedGroups,
-                speedballTokens = resetSpeedballs
-            )
-        )
+        // Speedball tokens are reset only by a long press (full reset).
+        updateState(currentState.copy(groups = updatedGroups))
     }
 
     fun fullReset() {
@@ -396,7 +367,7 @@ class MainViewModel(
                 nextOrderId = 1,
                 isLossOfLt = false,
                 victoryPoints = 0,
-                speedballTokens = emptyList(),
+                speedballTokens = listOf(SpeedballToken(id = 1, isSpent = true)),
                 convertedFromRegularIds = emptySet()
             )
         )

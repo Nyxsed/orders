@@ -6,20 +6,25 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
@@ -36,13 +41,19 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -66,7 +77,7 @@ fun TopHeaderBar(
     onSelectLayout: (GroupLayout) -> Unit,
     onToggleLossOfLt: () -> Unit,
     onChangeVictoryPoints: (Int) -> Unit,
-    onOpenQuickActions: () -> Unit,
+    onOpenHelp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
@@ -143,7 +154,7 @@ fun TopHeaderBar(
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_reset),
-                            contentDescription = "Reset Orders",
+                            contentDescription = stringResource(R.string.reset_orders_description),
                             tint = MaterialTheme.colorScheme.onError,
                             modifier = Modifier
                                 .size(16.dp)
@@ -153,7 +164,7 @@ fun TopHeaderBar(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "RESET ORDERS",
+                            text = stringResource(R.string.reset_orders),
                             color = MaterialTheme.colorScheme.onError,
                             fontWeight = FontWeight.Bold,
                             fontSize = 12.sp
@@ -170,7 +181,7 @@ fun TopHeaderBar(
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_layout_vertical),
-                            contentDescription = "Vertical Layout",
+                            contentDescription = stringResource(R.string.layout_vertical_description),
                             tint = if (currentLayout == GroupLayout.VERTICAL) {
                                 MaterialTheme.colorScheme.primary
                             } else {
@@ -184,7 +195,7 @@ fun TopHeaderBar(
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_layout_horizontal),
-                            contentDescription = "Horizontal Layout",
+                            contentDescription = stringResource(R.string.layout_horizontal_description),
                             tint = if (currentLayout == GroupLayout.HORIZONTAL) {
                                 MaterialTheme.colorScheme.primary
                             } else {
@@ -195,49 +206,42 @@ fun TopHeaderBar(
                 }
             }
 
-            // Status & VP Counter Bar
+            // Status & VP Counter Bar (three equally sized blocks)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Victory Points Counter
-                Surface(
-                    shape = RoundedCornerShape(10.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    modifier = Modifier.border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                        shape = RoundedCornerShape(10.dp)
-                    )
+                HeaderBlock(
+                    modifier = Modifier.weight(1f),
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         Text(
-                            text = "🏆 VP",
+                            text = stringResource(R.string.victory_points_label),
                             fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.primary
+                            fontSize = 9.sp,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 1
                         )
-
-                        // Minus button
                         VpButton(
                             text = "−",
                             enabled = victoryPoints > 0,
                             onClick = { onChangeVictoryPoints(-1) }
                         )
-
                         Text(
                             text = "$victoryPoints",
                             fontWeight = FontWeight.ExtraBold,
-                            fontSize = 14.sp,
-                            modifier = Modifier.padding(horizontal = 4.dp)
+                            fontSize = 12.sp,
+                            textAlign = TextAlign.Center,
+                            maxLines = 1,
+                            modifier = Modifier.widthIn(min = 14.dp)
                         )
-
-                        // Plus button
                         VpButton(
                             text = "+",
                             enabled = victoryPoints < 20,
@@ -247,60 +251,51 @@ fun TopHeaderBar(
                 }
 
                 // Loss of LT Checkbox Chip
-                Surface(
-                    shape = RoundedCornerShape(10.dp),
-                    color = if (isLossOfLt) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surface,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .border(
-                            width = 1.dp,
-                            color = if (isLossOfLt) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                            shape = RoundedCornerShape(10.dp)
-                        )
-                        .clickable { onToggleLossOfLt() }
+                HeaderBlock(
+                    modifier = Modifier.weight(1f),
+                    containerColor = if (isLossOfLt) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.surface,
+                    borderColor = if (isLossOfLt) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                    onClick = onToggleLossOfLt
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(2.dp)
                     ) {
                         Checkbox(
                             checked = isLossOfLt,
-                            onCheckedChange = { onToggleLossOfLt() },
+                            onCheckedChange = null,
                             colors = CheckboxDefaults.colors(
                                 checkedColor = MaterialTheme.colorScheme.error,
                                 uncheckedColor = MaterialTheme.colorScheme.onSurfaceVariant
                             ),
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(18.dp)
                         )
                         Text(
-                            text = if (isLossOfLt) "⚠️ LOSS OF LT" else "Loss of LT",
+                            text = stringResource(
+                                if (isLossOfLt) R.string.loss_of_lt_active else R.string.loss_of_lt
+                            ),
                             fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp,
+                            fontSize = 9.sp,
+                            maxLines = 1,
                             color = if (isLossOfLt) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
 
-                // Quick Triggers Button
-                Surface(
-                    shape = RoundedCornerShape(10.dp),
-                    color = OrderColors.CommandTokenThumb,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
-                        .clickable { onOpenQuickActions() }
+                // Help Button
+                HeaderBlock(
+                    modifier = Modifier.weight(1f),
+                    containerColor = OrderColors.CommandTokenThumb,
+                    borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                    onClick = onOpenHelp
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "⚡ Triggers",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp,
-                            color = Color.White
-                        )
-                    }
+                    Text(
+                        text = stringResource(R.string.help),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp,
+                        color = Color.White,
+                        maxLines = 1
+                    )
                 }
             }
 
@@ -335,7 +330,10 @@ fun TopHeaderBar(
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_command_token),
-                                contentDescription = "Command Token ${token.id}",
+                                contentDescription = stringResource(
+                                    R.string.command_token_description,
+                                    token.id
+                                ),
                                 tint = MaterialTheme.colorScheme.surface,
                                 modifier = Modifier.size(24.dp)
                             )
@@ -375,26 +373,85 @@ fun TopHeaderBar(
 }
 
 @Composable
+private fun HeaderBlock(
+    modifier: Modifier = Modifier,
+    containerColor: Color,
+    borderColor: Color,
+    onClick: (() -> Unit)? = null,
+    content: @Composable BoxScope.() -> Unit
+) {
+    val shape = RoundedCornerShape(8.dp)
+    Surface(
+        shape = shape,
+        color = containerColor,
+        modifier = modifier
+            .height(30.dp)
+            .then(
+                if (onClick != null) {
+                    Modifier
+                        .clip(shape)
+                        .clickable(onClick = onClick)
+                } else {
+                    Modifier
+                }
+            )
+            .border(width = 1.dp, color = borderColor, shape = shape)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 2.dp),
+            contentAlignment = Alignment.Center,
+            content = content
+        )
+    }
+}
+
+@Composable
 private fun VpButton(
     text: String,
     enabled: Boolean,
     onClick: () -> Unit
 ) {
+    val symbolColor = if (enabled) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+    val description = stringResource(
+        if (text == "+") R.string.victory_points_increase else R.string.victory_points_decrease
+    )
     Box(
         modifier = Modifier
-            .size(22.dp)
+            .size(16.dp)
             .clip(CircleShape)
             .background(
                 if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
             )
-            .clickable(enabled = enabled, onClick = onClick),
+            .clickable(enabled = enabled, onClick = onClick)
+            .semantics { contentDescription = description },
         contentAlignment = Alignment.Center
     ) {
-        Text(
-            text = text,
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Bold,
-            color = if (enabled) Color.White else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-        )
+        Canvas(modifier = Modifier.size(8.dp)) {
+            val stroke = 1.5.dp.toPx()
+            val half = size.minDimension / 2f - stroke / 2f
+            val cx = size.width / 2f
+            val cy = size.height / 2f
+
+            // Horizontal bar (minus)
+            drawLine(
+                color = symbolColor,
+                start = Offset(cx - half, cy),
+                end = Offset(cx + half, cy),
+                strokeWidth = stroke,
+                cap = StrokeCap.Round
+            )
+            // Vertical bar (plus only)
+            if (text == "+") {
+                drawLine(
+                    color = symbolColor,
+                    start = Offset(cx, cy - half),
+                    end = Offset(cx, cy + half),
+                    strokeWidth = stroke,
+                    cap = StrokeCap.Round
+                )
+            }
+        }
     }
 }

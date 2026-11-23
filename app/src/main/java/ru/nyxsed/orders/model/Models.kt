@@ -135,6 +135,7 @@ data class AppState(
         fun createInitialState(): AppState {
             // 4 unspent (index 1..4), 1 spent (index 5)
             val initialTokens = (1..MAX_COMMAND_TOKENS).map { CommandToken(id = it, isSpent = it > 4) }
+            val initialSpeedball = listOf(SpeedballToken(id = 1, isSpent = true))
             val group1 = OrderGroup(id = 1, orders = emptyList())
             val group2 = OrderGroup(id = 2, orders = emptyList())
             return AppState(
@@ -144,7 +145,7 @@ data class AppState(
                 nextOrderId = 1,
                 isLossOfLt = false,
                 victoryPoints = 0,
-                speedballTokens = emptyList(),
+                speedballTokens = initialSpeedball,
                 convertedFromRegularIds = emptySet()
             )
         }
@@ -178,8 +179,10 @@ data class AppState(
                     val tokenObj = speedballArray.getJSONObject(i)
                     SpeedballToken(
                         id = tokenObj.optInt("id", i + 1),
-                        isSpent = tokenObj.optBoolean("isSpent", false)
+                        isSpent = tokenObj.optBoolean("isSpent", true)
                     )
+                }.ifEmpty {
+                    listOf(SpeedballToken(id = 1, isSpent = true))
                 }
 
                 val convertedArray = json.optJSONArray("convertedFromRegularIds") ?: JSONArray()
@@ -248,8 +251,12 @@ data class AppState(
             }
 
             val speedballSpents = bundle.getBooleanArray(KEY_SPEEDBALL_TOKENS) ?: booleanArrayOf()
-            val speedballTokens = speedballSpents.mapIndexed { index, isSpent ->
-                SpeedballToken(id = index + 1, isSpent = isSpent)
+            val speedballTokens = if (speedballSpents.isEmpty()) {
+                listOf(SpeedballToken(id = 1, isSpent = true))
+            } else {
+                speedballSpents.mapIndexed { index, isSpent ->
+                    SpeedballToken(id = index + 1, isSpent = isSpent)
+                }
             }
 
             val convertedIdsArray = bundle.getIntArray(KEY_CONVERTED_IDS) ?: intArrayOf()
